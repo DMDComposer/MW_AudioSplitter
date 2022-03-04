@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <!-- <meta
+      http-equiv="X-Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'"
+    /> -->
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="node_modules\@fortawesome\fontawesome-free\css\all.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="node_modules\bootstrap\dist\css\bootstrap.min.css"
+    />
+    <script src="node_modules\@fortawesome\fontawesome-free\js\all.min.js"></script>
+    <script src="node_modules\bootstrap\dist\js\bootstrap.min.js"></script>
+    <title>Split Audio Files</title>
+  </head>
+  <body>
+    <br />
+
+    <div class="container folderPathContainer">
+      <div class="form-group" x-data="{ fileName: '' }">
+        <div class="input-group shadow">
+          <span class="input-group-text px-3 text-muted"
+            ><i class="fas fa-music fa-lg"></i
+          ></span>
+          <input
+            type="file"
+            id="hiddenInputFile"
+            webkitdirectory
+            directory
+            multiple
+            x-ref="file"
+            @change="fileName = $refs.file.files[0].name"
+            name="img[]"
+            class="d-none"
+          />
+          <input
+            type="text"
+            id="inputDestPath"
+            class="form-control form-control-lg"
+            placeholder="\Season 3\MW 313\MW 313 1m01 FF1 v1.0"
+            x-model="fileName"
+          />
+          <button
+            class="browse btn btn-primary px-4"
+            id="browseButton"
+            type="button"
+            x-on:click.prevent="$refs.file.click()"
+          >
+            <i class="fas fa-folder-open"></i> Browse
+          </button>
+        </div>
+      </div>
+    </div>
+    <br />
+
+    <div class="container">
+      <div class="row">
+        <div id="dropZone">
+          <div class="icon"><i class="fas fa-cloud-upload-alt"></i></div>
+          <span>Drag Audio Files Here</span>
+        </div>
+      </div>
+      <!-- <div class="row"> -->
+      <div id="outer-bar-loading" class="outer-bars">
+        <div id="inner-bar-loading" class="inner-bars"></div>
+      </div>
+      <!-- </div> -->
+      <div class="row">
+        <section id="main-app" class="main-app"></section>
+      </div>
+      <div class="row">
+        <div id="finalMessage" class="finalMessage"></div>
+      </div>
+    </div>
+  </body>
+  <script src="renderer.js" type="module"></script>
+</html>

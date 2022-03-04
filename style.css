@@ -1,0 +1,100 @@
+/* DROP ZONE */
+#dropZone {
+  border: 3px dotted crimson;
+  height: 500px;
+  margin: 10px 10px;
+  /* width: 700px; */
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+#dropZone .icon {
+  font-size: 100px;
+  color: crimson;
+}
+
+#dropZone .icon:hover {
+  color: rgb(224, 88, 115);
+  animation: bounceDropZoneIcon 1s infinite linear;
+}
+
+@keyframes bounceDropZoneIcon {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-25px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+#dropZone > span {
+  text-align: center;
+  font-family: "Segoe UI";
+  font-size: 36px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+/* PROGRESS BAR */
+
+#outer-bar-loading {
+  display: none;
+  height: 40px;
+  width: 60vw;
+  margin: 10px auto;
+  border-radius: 7px;
+  background-color: transparent;
+  border: 1px solid #333;
+}
+
+#inner-bar-loading {
+  display: flex;
+  height: 41px;
+  transform: translateY(-1px);
+  width: 0%;
+  border-radius: 7px;
+  background-color: #5bcc7f;
+}
+
+#main-app {
+  display: none;
+  text-align: center;
+  color: #333;
+  font-family: "Segoe UI";
+  font-size: 36px;
+}
+
+/* browse button */
+.folderPathContainer {
+  margin-left: 50px;
+  /* margin-right: 10px; */
+}
+.btn-file {
+  position: relative;
+  overflow: hidden;
+}
+#hiddenInputFile {
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 100%;
+  min-height: 100%;
+  font-size: 100px;
+  text-align: right;
+  filter: alpha(opacity=0);
+  opacity: 0;
+  background: red;
+  cursor: inherit;
+  display: block;
+}
+input {
+  background-color: white !important;
+  cursor: text !important;
+  font-size: 1rem !important;
+}
