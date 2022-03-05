@@ -1,4 +1,11 @@
-const { app, BrowserWindow, ipcMain, globalShortcut, Notification } = require("electron")
+const {
+  app,
+  BrowserWindow,
+  ipcMain,
+  globalShortcut,
+  Notification,
+  dialog,
+} = require("electron")
 const { lstatSync, readdirSync } = require("fs")
 const os = require("os")
 const path = require("path")
@@ -21,11 +28,21 @@ async function main() {
     transparent: true,
     alwaysOnTop: true,
     autoHideMenuBar: true,
+    frame: false,
+    // show: false,
     backgroundColor: "#181A1B",
+    webPreferences: {
+      devTools: app.isPackaged ? false : true,
+      nodeIntegration: false, // is default value after Electron v5
+      contextIsolation: true, // protect against prototype pollution
+      preload: path.join(__dirname, "preload.js"), // use a preload script
+    },
   })
 
+  // loadingWindow.on("ready-to-show", () => loadingWindow.show())
+
   loadingWindow.loadFile(path.join(__dirname, "./loadingWindow/loading.html"))
-  loadingWindow.center()
+  loadingWindow.webContents.openDevTools()
 
   mainWindow = new BrowserWindow({
     width: width,
@@ -53,10 +70,10 @@ async function main() {
   mainWindow.on("moved", () => saveBounds(mainWindow.getBounds()))
   mainWindow.webContents.openDevTools()
   mainWindow.loadFile(path.join(__dirname + "/index.html"))
-  mainWindow.on("ready-to-show", () => {
-    mainWindow.show()
-    loadingWindow.close()
-  })
+  // mainWindow.on("ready-to-show", () => {
+  //   mainWindow.show()
+  //   loadingWindow.close()
+  // })
 }
 
 // set title of Notification
@@ -181,4 +198,41 @@ ipcMain.handle("newNotification", async (_, args) => {
     body: `Total Number of Stems: ${countAudioSplits} \n ${countAudioSplits} / ${totalFilesInDestPath} ${fileMissingError}`,
     timeoutType: "default",
   }).show()
+})
+
+ipcMain.handle("newDialog", async (_, args) => {
+  console.log("\u001b[" + 32 + "m" + args + "\u001b[0m")
+  const userResponse = dialog.showMessageBoxSync(
+    loadingWindow,
+    args,
+    (response, checkboxChecked) => {
+      console.log(response)
+      console.log(checkboxChecked) //true or false
+    }
+  )
+  return userResponse
+})
+
+ipcMain.handle("toggleLoadingWindow", async (_, args) => {
+  !loadingWindow.isVisible() ? loadingWindow.show() : loadingWindow.hide()
+})
+
+ipcMain.handle("skipUpdate", async (_, args) => {
+  mainWindow.on("ready-to-show", () => {
+    mainWindow.show()
+    try {
+      loadingWindow.close()
+    } catch (error) {
+      console.log(`\u001b[${35}mloadingWindow: ${error}\u001b[0m`)
+    }
+  })
+})
+
+ipcMain.on("app/quit", (_, error) => {
+  app.exit(0)
+})
+
+ipcMain.handle("get/appName", async (_) => {
+  console.log("\u001b[" + 31 + "m" + app.getName() + "\u001b[0m")
+  return app.getName()
 })

@@ -1,7 +1,7 @@
 {
   "name": "MW_AudioSplitter",
   "appId": "com.MW.AudioSplitter",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Audio Splitting using FFmpeg & FFprobe",
   "main": "main.js",
   "scripts": {
@@ -20,7 +20,7 @@
       "icon": "./assets/icons/win/icon.ico"
     }
   },
-  "author": "",
+  "author": "DMDComposer",
   "license": "ISC",
   "devDependencies": {
     "electron": "^16.0.8",
@@ -31,6 +31,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.0.0",
     "bootstrap": "^5.1.3",
-    "electron-store": "^8.0.1"
+    "electron-store": "^8.0.1",
+    "uaup-js": "^0.0.22"
   }
 }
