@@ -12,7 +12,7 @@ const path = require("path")
 const { execSync, spawnSync } = require("child_process")
 const { getWindowsBounds, saveBounds } = require("./settings")
 const { resolve } = require("path")
-app.isPackaged ? require("electron-reload")(__dirname) : ""
+// app.isPackaged ? require("electron-reload")(__dirname) : ""
 
 let loadingWindow,
   mainWindow,
@@ -22,6 +22,8 @@ app.whenReady().then(main)
 
 async function main() {
   const { x, y, width, height } = getWindowsBounds()
+
+  // loadingWindow
   loadingWindow = new BrowserWindow({
     width: 400,
     height: 360,
@@ -29,21 +31,25 @@ async function main() {
     alwaysOnTop: true,
     autoHideMenuBar: true,
     frame: false,
-    // show: false,
+    show: false,
     backgroundColor: "#181A1B",
     webPreferences: {
       devTools: app.isPackaged ? false : true,
+      devTools: true,
       nodeIntegration: false, // is default value after Electron v5
       contextIsolation: true, // protect against prototype pollution
       preload: path.join(__dirname, "preload.js"), // use a preload script
     },
   })
 
-  // loadingWindow.on("ready-to-show", () => loadingWindow.show())
-
   loadingWindow.loadFile(path.join(__dirname, "./loadingWindow/loading.html"))
   loadingWindow.webContents.openDevTools()
 
+  loadingWindow.on("closed", () => {
+    app.exit(0)
+  })
+
+  // mainWindow
   mainWindow = new BrowserWindow({
     width: width,
     height: height,
@@ -201,7 +207,6 @@ ipcMain.handle("newNotification", async (_, args) => {
 })
 
 ipcMain.handle("newDialog", async (_, args) => {
-  console.log("\u001b[" + 32 + "m" + args + "\u001b[0m")
   const userResponse = dialog.showMessageBoxSync(
     loadingWindow,
     args,
@@ -218,14 +223,22 @@ ipcMain.handle("toggleLoadingWindow", async (_, args) => {
 })
 
 ipcMain.handle("skipUpdate", async (_, args) => {
-  mainWindow.on("ready-to-show", () => {
-    mainWindow.show()
-    try {
-      loadingWindow.close()
-    } catch (error) {
-      console.log(`\u001b[${35}mloadingWindow: ${error}\u001b[0m`)
-    }
-  })
+  console.log("\u001b[" + 32 + "m" + "skipUpdate" + "\u001b[0m")
+  mainWindow.show()
+  // need to make an updatingWindow & loadingWindow separate.
+  // if loadingWindow closes than continue, if updatingWindow closes than restart app
+  try {
+    loadingWindow.hide()
+  } catch (error) {
+    console.log(`\u001b[${35}mloadingWindow: ${error}\u001b[0m`)
+  }
+  // try {
+  //   loadingWindow.close()
+  // } catch (error) {
+  //   console.log(`\u001b[${35}mloadingWindow: ${error}\u001b[0m`)
+  // }
+  // mainWindow.on("ready-to-show", () => {
+  // })
 })
 
 ipcMain.on("app/quit", (_, error) => {
@@ -233,6 +246,5 @@ ipcMain.on("app/quit", (_, error) => {
 })
 
 ipcMain.handle("get/appName", async (_) => {
-  console.log("\u001b[" + 31 + "m" + app.getName() + "\u001b[0m")
   return app.getName()
 })

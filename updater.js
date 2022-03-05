@@ -1,4 +1,4 @@
-const appName = window.api.appName()
+// const appName = window.api.appName()
 
 const defaultStages = {
   Checking: "Checking For Updates!", // When Checking For Updates.
@@ -14,14 +14,14 @@ const updateOptions = {
   useGithub: true, // {Default is true} [Optional] Only Github is currently Supported.
   gitRepo: "MW_AudioSplitter", // [Required] Your Repo Name
   gitUsername: "DMDComposer", // [Required] Your GitHub Username.
-  isGitRepoPrivate: true, // {Default is false} [Optional] If the Repo is Private or Public  (Currently not Supported).
+  isGitRepoPrivate: false, // {Default is false} [Optional] If the Repo is Private or Public  (Currently not Supported).
   gitRepoToken: "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", // {Default is null} [Optional] The Token from GitHub to Access a Private Repo.  Only for Private Repos.
 
-  appName: appName, //[Required] The Name of the app archive and the app folder.
-  appExecutableName: `${appName}.exe`, //[Required] The Executable of the Application to be Run after updating.
+  appName: "MW_AudioSplitter", //[Required] The Name of the app archive and the app folder.
+  appExecutableName: `MW_AudioSplitter.exe`, //[Required] The Executable of the Application to be Run after updating.
 
   appDirectory: "D:/Users/Dillon/Downloads/tempDir", //{Default is "Application Data/AppName"} [Optional]  Where the app will receide, make sure your app has permissions to be there.
-  //   versionFile: "/path/to/version.json", // {Default is "Application directory/settings/version.json"} [Optional] The Path to the Local Version File.
+  versionFile: "./version.json", // {Default is "Application directory/settings/version.json"} [Optional] The Path to the Local Version File.
   //   tempDirectory: "/tmp", // {Default is "Application directory/tmp"} [Optional] Where the Update archive will download to.
 
   progressBar: document.getElementById("download"), // {Default is null} [Optional] If Using Electron with a HTML Progressbar, use that element here, otherwise ignore
@@ -30,16 +30,15 @@ const updateOptions = {
   stageTitles: defaultStages, // {Default is defaultStages} [Optional] Sets the Status Title for Each Stage
 }
 
-let isUpdateAvailable = window.uaup.CheckForUpdates(updateOptions)
-if (isUpdateAvailable) {
-  window.api.toggleLoadingWindow()
-  getUserDecision()
-}
-if (!isUpdateAvailable) {
-  console.log("\u001b[" + 35 + "m" + "No update..." + "\u001b[0m")
-}
+let isUpdateAvailable = await window.uaup.CheckForUpdates(updateOptions)
+
+if (isUpdateAvailable) getUserDecision()
+
+if (!isUpdateAvailable) window.api.skipUpdate()
 
 async function getUserDecision() {
+  // window.api.toggleLoadingWindow()
+
   const userResponse = await window.api.newDialog({
     type: "none",
     defaultId: 1,
@@ -48,7 +47,11 @@ async function getUserDecision() {
     noLink: true,
     message: "Update is available, would you like to update?",
   })
-  if (userResponse === 0) window.api.toggleLoadingWindow()
+
+  if (userResponse === 0) {
+    window.api.toggleLoadingWindow()
+    window.uaup.Update(updateOptions)
+  }
   if (userResponse === 1) window.api.skipUpdate()
   if (userResponse === 2) window.api.window.quit()
 }
