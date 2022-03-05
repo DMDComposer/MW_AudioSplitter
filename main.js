@@ -1,9 +1,10 @@
-const { app, BrowserWindow, ipcMain, globalShortcut } = require("electron")
+const { app, BrowserWindow, ipcMain, globalShortcut, Notification } = require("electron")
 const { lstatSync, readdirSync } = require("fs")
 const os = require("os")
 const path = require("path")
 const { execSync, spawnSync } = require("child_process")
 const { getWindowsBounds, saveBounds } = require("./settings")
+const { resolve } = require("path")
 app.isPackaged ? require("electron-reload")(__dirname) : ""
 
 let loadingWindow,
@@ -159,4 +160,19 @@ ipcMain.handle("openBrowse", async (_, args) => {
   const { openBrowse } = require("./openBrowse")
   const openedDir = await openBrowse()
   return openedDir
+})
+
+ipcMain.handle("newNotification", async (_, args) => {
+  // args[0] countAudioSplits[1]
+  // args[1] totalFilesInDestPath
+  // args[2] fileMissingError
+
+  new Notification({
+    title: "Audio Splits Completed",
+    icon: "./assets/icons/png/icon.png",
+    sound: resolve(__dirname, ".", "assets", "audio", "tada.wav"),
+    silent: false,
+    body: `Total Number of Stems: ${args[0]} \n ${args[0]} / ${args[1]} ${args[2]}`,
+    timeoutType: "default",
+  }).show()
 })

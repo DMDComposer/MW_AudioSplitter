@@ -1,8 +1,7 @@
 import { split1MXAudio, split2MXAudio, split6MXAudio } from "./splitMXAudio.js"
 import { checkAudioNull } from "./checkAudioNull.js"
-const { platform } = window.api.os
 const currDestPath = api.getLastSavedDestPath()
-const ffprobe = platform() !== "darwin" ? "ffprobe" : "/usr/local/bin/ffprobe"
+const ffprobe = api.platform !== "darwin" ? "ffprobe" : "/usr/local/bin/ffprobe"
 
 const INNER_BAR_LOADING = document.getElementById("inner-bar-loading"),
   MAIN_APP = document.getElementById("main-app"),
@@ -20,13 +19,12 @@ if (await api.isFolder(currDestPath)) initDestPath.style.border = "2px solid #5b
 
 async function openBrowseDialog() {
   const result = await api.openBrowse()
-  console.log(result)
+  // console.log(result)
   if (result.canceled) return
   initDestPath.value = result.filePaths[0]
 }
 
 browseButton.addEventListener("click", (e) => {
-  // hiddenInputFile.click()
   openBrowseDialog()
 })
 
@@ -94,6 +92,7 @@ dropZone.addEventListener("mouseleave", (e) => {
 dropZone.addEventListener("drop", async (e) => {
   e.stopPropagation()
   e.preventDefault()
+
   // clear any user messages
   FINAL_MESSAGE.innerText = ""
 
@@ -182,15 +181,7 @@ async function splitAudioFiles(e) {
         : "\n Complete: All Files Accounted For"
 
   // finalMessage
-  console.log(api.notificationSoundPath)
-  Notification.requestPermission().then(function (result) {
-    const myNotification = new Notification("Audio Splits Completed", {
-      icon: "./assets/icons/png/icon.png",
-      sound: api.notificationSoundPath, // C:\Windows\Media
-      silent: false,
-      body: `Total Number of Stems: ${countAudioSplits[1]} \n ${countAudioSplits[1]} / ${totalFilesInDestPath} ${fileMissingError}`,
-    })
-  })
+  api.newNotification([countAudioSplits[1], totalFilesInDestPath, fileMissingError])
 
   resetProgressBar()
 }

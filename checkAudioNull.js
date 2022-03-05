@@ -1,6 +1,5 @@
-const { platform } = window.api.os
-const ffprobe = platform() !== "darwin" ? "ffprobe" : "/usr/local/bin/ffprobe"
-const ffmpeg = platform() !== "darwin" ? "ffmpeg" : "/usr/local/bin/ffmpeg"
+const ffprobe = api.platform !== "darwin" ? "ffprobe" : "/usr/local/bin/ffprobe"
+const ffmpeg = api.platform !== "darwin" ? "ffmpeg" : "/usr/local/bin/ffmpeg"
 
 export async function checkAudioNull(filePath) {
   const totalDuration = await getTotalDuration(filePath),
