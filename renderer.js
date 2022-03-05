@@ -167,6 +167,7 @@ async function splitAudioFiles(e) {
 
   MAIN_APP.style.display = "block"
   MAIN_APP.innerText = "Finalizing Audio..."
+  INNER_BAR_LOADING.style.width = `100%`
 
   FINAL_MESSAGE.innerText =
     "List of Silent Audio Stems Below:\n" + JSON.stringify(silentAudioList)
@@ -193,9 +194,9 @@ async function progressBarUpdate(percentage, totalAudio) {
 
   // clear progress bar after completion
   if (percentage >= totalAudio) {
+    INNER_BAR_LOADING.style.width = `${percentageFraction}%`
     const progress_interval = setInterval(() => {
       completionTimer += 1
-      INNER_BAR_LOADING.style.width = "100%"
       if (completionTimer == 5) {
         clearInterval(progress_interval)
         resetProgressBar()

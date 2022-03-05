@@ -14,7 +14,7 @@ const api = {
   },
   isFile: (path) => ipcRenderer.invoke("is-file", path),
   isFolder: (path) => ipcRenderer.invoke("is-folder", path),
-  ffmpeg: (args) => ipcRenderer.invoke("ffmpeg-actions", args),
+  ffmpeg: (args) => ipcRenderer.invoke("ffmpeg", args),
   audioChannelsString: (args) => ipcRenderer.invoke("audioChannelsString", args),
   getTotalSilence: (args) => ipcRenderer.invoke("getTotalSilence", args),
   getCountAudioSplits: (destPath) => ipcRenderer.invoke("getCountAudioSplits", destPath),

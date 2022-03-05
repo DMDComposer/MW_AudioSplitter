@@ -76,22 +76,27 @@ ipcMain.handle("is-folder", async (_, path) => {
 })
 
 ipcMain.handle("pbUpdateListener", async (_, progress) => {
-  // console.log(`setProgressBar: ${progress}`)
-  mainWindow.setProgressBar(progress)
-  if (progress >= 1) {
-    // console.log("cleared the progressBar")
-    mainWindow.setProgressBar(-1)
-  }
+  progress >= 1 ? mainWindow.setProgressBar(-1) : mainWindow.setProgressBar(progress)
 })
 
 ipcMain.handle("resetProgressBar", async (_, args) => {
-  console.log("\u001b[" + 31 + "m" + "did i make it" + "\u001b[0m")
   mainWindow.setProgressBar(-1)
 })
 
-ipcMain.handle("ffmpeg-actions", async (_, args) => {
-  // console.log(args[0], args[1])
-  execSync(args[0], args[1])
+ipcMain.handle("ffmpeg", async (_, args) => {
+  try {
+    execSync(args[0], args[1])
+  } catch (error) {
+    const err = error.stderr.toString().split("\n")
+    new Notification({
+      title: "Audio Splits Error",
+      icon: "./assets/icons/png/icon.png",
+      sound: resolve(__dirname, ".", "assets", "audio", "ding.wav"),
+      silent: false,
+      body: `Something went wrong: ${err[err.length - 2]}`,
+      timeoutType: "default",
+    }).show()
+  }
 })
 
 ipcMain.handle("audioChannelsString", async (_, args) => {
@@ -163,16 +168,16 @@ ipcMain.handle("openBrowse", async (_, args) => {
 })
 
 ipcMain.handle("newNotification", async (_, args) => {
-  // args[0] countAudioSplits[1]
-  // args[1] totalFilesInDestPath
-  // args[2] fileMissingError
+  const countAudioSplits = args?.[0]
+  const totalFilesInDestPath = args?.[1]
+  const fileMissingError = args?.[2]
 
   new Notification({
     title: "Audio Splits Completed",
     icon: "./assets/icons/png/icon.png",
     sound: resolve(__dirname, ".", "assets", "audio", "tada.wav"),
     silent: false,
-    body: `Total Number of Stems: ${args[0]} \n ${args[0]} / ${args[1]} ${args[2]}`,
+    body: `Total Number of Stems: ${countAudioSplits} \n ${countAudioSplits} / ${totalFilesInDestPath} ${fileMissingError}`,
     timeoutType: "default",
   }).show()
 })
