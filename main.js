@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require("electron")
+const { app, BrowserWindow, ipcMain, globalShortcut } = require("electron")
 const { lstatSync, readdirSync } = require("fs")
 const os = require("os")
 const path = require("path")
@@ -75,17 +75,22 @@ ipcMain.handle("is-folder", async (_, path) => {
 })
 
 ipcMain.handle("pbUpdateListener", async (_, progress) => {
-  console.log(`setProgressBar: ${progress}`)
+  // console.log(`setProgressBar: ${progress}`)
   mainWindow.setProgressBar(progress)
   if (progress >= 1) {
-    console.log("cleared the progressBar")
+    // console.log("cleared the progressBar")
     mainWindow.setProgressBar(-1)
   }
 })
 
+ipcMain.handle("resetProgressBar", async (_, args) => {
+  console.log("\u001b[" + 31 + "m" + "did i make it" + "\u001b[0m")
+  mainWindow.setProgressBar(-1)
+})
+
 ipcMain.handle("ffmpeg-actions", async (_, args) => {
   // console.log(args[0], args[1])
-  await execSync(args[0], args[1])
+  execSync(args[0], args[1])
 })
 
 ipcMain.handle("audioChannelsString", async (_, args) => {

@@ -15,20 +15,16 @@ const api = {
   isFile: (path) => ipcRenderer.invoke("is-file", path),
   isFolder: (path) => ipcRenderer.invoke("is-folder", path),
   ffmpeg: (args) => ipcRenderer.invoke("ffmpeg-actions", args),
-  audioChannelsString: (args) =>
-    ipcRenderer.invoke("audioChannelsString", args),
+  audioChannelsString: (args) => ipcRenderer.invoke("audioChannelsString", args),
   getTotalSilence: (args) => ipcRenderer.invoke("getTotalSilence", args),
-  getCountAudioSplits: (destPath) =>
-    ipcRenderer.invoke("getCountAudioSplits", destPath),
+  getCountAudioSplits: (destPath) => ipcRenderer.invoke("getCountAudioSplits", destPath),
   getTotalFilesInDestPath: (destPath) =>
     ipcRenderer.invoke("getTotalFilesInDestPath", destPath),
   getLastSavedDestPath: () => getLastSavedPath(),
   setLastSavedDestPath: (currPath) => setLastSavedPath(currPath),
-  notificationSoundPath: path.join(
-    __dirname,
-    "./assets/audio/Windows Background.wav"
-  ),
+  notificationSoundPath: path.join(__dirname, "./assets/audio/Windows Background.wav"),
   openBrowse: () => ipcRenderer.invoke("openBrowse", true),
+  resetProgressBar: () => ipcRenderer.send("resetProgressBar"),
   path: path,
   os: os,
   fs: fs,

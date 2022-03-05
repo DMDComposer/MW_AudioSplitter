@@ -198,6 +198,7 @@ async function splitAudioFiles(e) {
 async function progressBarUpdate(percentage, totalAudio) {
   let percentageFraction = (percentage / totalAudio).toFixed(2) * 100
   let completionTimer = 0
+  await window.ipcRenderer.invoke("pbUpdateListener", percentageFraction / 100)
 
   // clear progress bar after completion
   if (percentage >= totalAudio) {
@@ -207,6 +208,7 @@ async function progressBarUpdate(percentage, totalAudio) {
       if (completionTimer == 5) {
         clearInterval(progress_interval)
         resetProgressBar()
+        window.api.resetProgressBar()
       }
     }, 1000)
     return
@@ -216,7 +218,6 @@ async function progressBarUpdate(percentage, totalAudio) {
   MAIN_APP.innerText = `${percentage} / ${totalAudio}`
   INNER_BAR_LOADING.style.width = `${percentageFraction}%`
   INNER_BAR_LOADING.style.border = "2px solid #333"
-  await window.ipcRenderer.invoke("pbUpdateListener", percentageFraction / 100)
 }
 function resetProgressBar() {
   MAIN_APP.innerText = ""
