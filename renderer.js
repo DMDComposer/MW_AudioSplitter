@@ -169,8 +169,8 @@ async function splitAudioFiles(e) {
   MAIN_APP.innerText = "Finalizing Audio..."
   INNER_BAR_LOADING.style.width = `100%`
 
-  FINAL_MESSAGE.innerText =
-    "List of Silent Audio Stems Below:\n" + JSON.stringify(silentAudioList)
+  FINAL_MESSAGE.innerHTML =
+    "<b>List of Silent Audio Stems Below:</b>\n" + getSilentAudioList(silentAudioList)
 
   // let countAudioSplits = getCountAudioSplits(destPath),
   let countAudioSplits = await api.getCountAudioSplits(destPath),
@@ -185,6 +185,26 @@ async function splitAudioFiles(e) {
   api.newNotification([countAudioSplits[1], totalFilesInDestPath, fileMissingError])
 
   resetProgressBar()
+}
+
+function getSilentAudioList(data) {
+  return data.length
+    ? getSilentAudioListTable(data)
+    : "<i>No audio files were silent...</i>"
+}
+
+function getSilentAudioListTable(data) {
+  var result = "<table border=1>"
+  for (var i = 0; i < myArray.length; i++) {
+    result += "<tr>"
+    for (var j = 0; j < myArray[i].length; j++) {
+      result += "<td>" + myArray[i][j] + "</td>"
+    }
+    result += "</tr>"
+  }
+  result += "</table>"
+
+  return result
 }
 
 async function progressBarUpdate(percentage, totalAudio) {

@@ -98,3 +98,8 @@ input {
   cursor: text !important;
   font-size: 1rem !important;
 }
+
+.finalMessage {
+  display: grid;
+  place-items: center;
+}

@@ -108,7 +108,8 @@ ipcMain.handle("getTotalSilence", async (_, args) => {
 })
 
 ipcMain.handle("getCountAudioSplits", async (_, destPath) => {
-  let filesPrinted = readdirSync(destPath), // https://stackoverflow.com/questions/32511789/looping-through-files-in-a-folder-node-js
+  // https://stackoverflow.com/questions/32511789/looping-through-files-in-a-folder-node-js
+  let filesPrinted = readdirSync(destPath),
     totalPrintedStems = 0,
     stemsList = [
       "2MIX",
