@@ -1,5 +1,3 @@
-// const appName = window.api.appName()
-
 const defaultStages = {
   Checking: "Checking For Updates!", // When Checking For Updates.
   Found: "Update Found!", // If an Update is Found.
@@ -21,7 +19,7 @@ const updateOptions = {
   appExecutableName: `MW_AudioSplitter.exe`, //[Required] The Executable of the Application to be Run after updating.
 
   appDirectory: "D:/Users/Dillon/Downloads/tempDir", //{Default is "Application Data/AppName"} [Optional]  Where the app will receide, make sure your app has permissions to be there.
-  versionFile: "./version.json", // {Default is "Application directory/settings/version.json"} [Optional] The Path to the Local Version File.
+  // versionFile: "./version.json", // {Default is "Application directory/settings/version.json"} [Optional] The Path to the Local Version File.
   //   tempDirectory: "/tmp", // {Default is "Application directory/tmp"} [Optional] Where the Update archive will download to.
 
   progressBar: document.getElementById("download"), // {Default is null} [Optional] If Using Electron with a HTML Progressbar, use that element here, otherwise ignore
@@ -30,15 +28,13 @@ const updateOptions = {
   stageTitles: defaultStages, // {Default is defaultStages} [Optional] Sets the Status Title for Each Stage
 }
 
-let isUpdateAvailable = await window.uaup.CheckForUpdates(updateOptions)
+let isUpdateAvailable = await window.api.uaupCheckForUpdates(updateOptions)
 
 if (isUpdateAvailable) getUserDecision()
 
 if (!isUpdateAvailable) window.api.skipUpdate()
 
 async function getUserDecision() {
-  // window.api.toggleLoadingWindow()
-
   const userResponse = await window.api.newDialog({
     type: "none",
     defaultId: 1,
@@ -50,7 +46,7 @@ async function getUserDecision() {
 
   if (userResponse === 0) {
     window.api.toggleLoadingWindow()
-    window.uaup.Update(updateOptions)
+    window.api.uaupUpdate(updateOptions)
   }
   if (userResponse === 1) window.api.skipUpdate()
   if (userResponse === 2) window.api.window.quit()
