@@ -1,5 +1,4 @@
 const { ipcRenderer, contextBridge } = require("electron")
-const { Update, CheckForUpdates, GetAppLibrary } = require("uaup-js")
 const { getLastSavedPath, setLastSavedPath } = require("./settings"),
   path = require("path"),
   os = require("os"),
@@ -35,9 +34,6 @@ const api = {
   path: path,
   os: os,
   fs: fs,
-  uaupUpdate: (args) => Update(args),
-  uaupCheckForUpdates: (args) => CheckForUpdates(args),
-  uaupGetAppLibrary: (args) => GetAppLibrary(args),
 }
 
 contextBridge.exposeInMainWorld("api", api)

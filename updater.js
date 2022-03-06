@@ -28,7 +28,7 @@ const updateOptions = {
   stageTitles: defaultStages, // {Default is defaultStages} [Optional] Sets the Status Title for Each Stage
 }
 
-let isUpdateAvailable = await window.api.uaupCheckForUpdates(updateOptions)
+/* let isUpdateAvailable = await window.api.uaupCheckForUpdates(updateOptions)
 
 if (isUpdateAvailable) getUserDecision()
 
@@ -50,4 +50,4 @@ async function getUserDecision() {
   }
   if (userResponse === 1) window.api.skipUpdate()
   if (userResponse === 2) window.api.window.quit()
-}
+} */

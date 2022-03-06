@@ -1,13 +1,13 @@
 {
   "name": "MW_AudioSplitter",
   "appId": "com.MW.AudioSplitter",
-  "version": "1.0.2",
+  "version": "1.0.0",
   "description": "Audio Splitting using FFmpeg & FFprobe",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "build": "electron-builder",
-    "package": "electron-builder"
+    "publish": "electron-builder --win --publish always"
   },
   "build": {
     "appId": "app.id",
@@ -17,6 +17,13 @@
       "target": "dir"
     },
     "win": {
+      "publish": [
+        {
+          "provider": "github",
+          "owner": "DMDComposer",
+          "repo": "MW_AudioSplitter"
+        }
+      ],
       "icon": "./assets/icons/win/icon.ico"
     }
   },
@@ -32,6 +39,6 @@
     "@fortawesome/fontawesome-free": "^6.0.0",
     "bootstrap": "^5.1.3",
     "electron-store": "^8.0.1",
-    "uaup-js": "^0.0.22"
+    "electron-updater": "^4.6.5"
   }
 }

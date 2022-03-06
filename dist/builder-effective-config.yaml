@@ -7,6 +7,10 @@ mac:
   category: your.app.category.type
   target: dir
 win:
+  publish:
+    - provider: github
+      owner: DMDComposer
+      repo: MW_AudioSplitter
   icon: ./assets/icons/win/icon.ico
 files: []
 electronVersion: 16.0.8

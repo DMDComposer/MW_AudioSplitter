@@ -6,6 +6,7 @@ const {
   Notification,
   dialog,
 } = require("electron")
+const { autoUpdater } = require("electron-updater")
 const { lstatSync, readdirSync } = require("fs")
 const os = require("os")
 const path = require("path")
@@ -23,7 +24,7 @@ app.whenReady().then(main)
 async function main() {
   const { x, y, width, height } = getWindowsBounds()
 
-  // loadingWindow
+  /* // loadingWindow
   loadingWindow = new BrowserWindow({
     width: 400,
     height: 360,
@@ -45,9 +46,13 @@ async function main() {
   loadingWindow.loadFile(path.join(__dirname, "./loadingWindow/loading.html"))
   loadingWindow.webContents.openDevTools()
 
+  loadingWindow.show()
+  
   loadingWindow.on("closed", () => {
     app.exit(0)
-  })
+  }) */
+
+  autoUpdater.checkForUpdates()
 
   // mainWindow
   mainWindow = new BrowserWindow({
@@ -76,11 +81,40 @@ async function main() {
   mainWindow.on("moved", () => saveBounds(mainWindow.getBounds()))
   mainWindow.webContents.openDevTools()
   mainWindow.loadFile(path.join(__dirname + "/index.html"))
-  // mainWindow.on("ready-to-show", () => {
-  //   mainWindow.show()
-  //   loadingWindow.close()
-  // })
+  mainWindow.on("ready-to-show", () => {
+    mainWindow.show()
+    // loadingWindow.close()
+  })
 }
+
+// autoUpdater
+
+autoUpdater.on("update-available", (_, releaseNotes, releaseName) => {
+  const dialogOptions = {
+    type: "info",
+    buttons: ["Ok"],
+    title: "Application Update",
+    message: os.platform() === "win32" ? releaseNotes : releaseName,
+    detail: "A new version is being downloaded...",
+  }
+  dialog.showMessageBox(dialogOptions, (response) => {
+    // do what I need to do with userResponse
+  })
+})
+
+autoUpdater.on("update-downloaded", (_, releaseNotes, releaseName) => {
+  const dialogOptions = {
+    type: "info",
+    buttons: ["Restart", "Later"],
+    title: "Application Update",
+    message: os.platform() === "win32" ? releaseNotes : releaseName,
+    detail:
+      "A new version is been successfully downloaded. Would you like to restart the application to apply the update?",
+  }
+  dialog.showMessageBox(dialogOptions).then((userResponse) => {
+    if (userResponse === 0) autoUpdater.quitAndInstall()
+  })
+})
 
 // set title of Notification
 app.setAppUserModelId("MW Audio Splitter")
