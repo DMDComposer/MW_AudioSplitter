@@ -1,4 +1,21 @@
-const defaultStages = {
+const progressBar = document.getElementById("download")
+const label = document.getElementById("download-label")
+
+window.api.on("update/progressBar", (args) => {
+  // console.table({ args })
+  try {
+    if (progressBar !== null) progressBar.setAttribute("value", args)
+  } catch {}
+})
+
+/* function updateHeader(value) {
+    console.log(value)
+    try {
+      if (dl_label !== null) dl_label.innerHTML = value
+    } catch {}
+  } */
+
+/* const defaultStages = {
   Checking: "Checking For Updates!", // When Checking For Updates.
   Found: "Update Found!", // If an Update is Found.
   NotFound: "No Update Found.", // If an Update is Not Found.
@@ -27,7 +44,7 @@ const updateOptions = {
   forceUpdate: false, // {Default is false} [Optional] If the Application should be forced updated.  This will change to true if any errors occur while launching.
   stageTitles: defaultStages, // {Default is defaultStages} [Optional] Sets the Status Title for Each Stage
 }
-
+ */
 /* let isUpdateAvailable = await window.api.uaupCheckForUpdates(updateOptions)
 
 if (isUpdateAvailable) getUserDecision()

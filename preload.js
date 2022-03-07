@@ -34,6 +34,7 @@ const api = {
   path: path,
   os: os,
   fs: fs,
+  test: "hello",
 }
 
 contextBridge.exposeInMainWorld("api", api)

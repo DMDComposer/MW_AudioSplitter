@@ -8,12 +8,13 @@ const {
 } = require("electron")
 const { autoUpdater } = require("electron-updater")
 const { lstatSync, readdirSync } = require("fs")
-const os = require("os")
+const { platform } = require("os")
 const path = require("path")
 const { execSync, spawnSync } = require("child_process")
 const { getWindowsBounds, saveBounds } = require("./settings")
 const { resolve } = require("path")
-// app.isPackaged ? require("electron-reload")(__dirname) : ""
+const isDev = require("electron-is-dev")
+if (isDev) require("electron-reload")(__dirname)
 
 let loadingWindow,
   mainWindow,
@@ -23,8 +24,15 @@ app.whenReady().then(main)
 
 async function main() {
   const { x, y, width, height } = getWindowsBounds()
+  const webPreferences = {
+    devTools: isDev ? true : false,
+    nodeIntegration: false, // is default value after Electron v5
+    contextIsolation: true, // protect against prototype pollution
+    enableRemoteModule: false, // turn off remote
+    preload: path.join(__dirname, "preload.js"), // use a preload script
+  }
 
-  /* // loadingWindow
+  // loadingWindow
   loadingWindow = new BrowserWindow({
     width: 400,
     height: 360,
@@ -34,25 +42,20 @@ async function main() {
     frame: false,
     show: false,
     backgroundColor: "#181A1B",
-    webPreferences: {
-      devTools: app.isPackaged ? false : true,
-      devTools: true,
-      nodeIntegration: false, // is default value after Electron v5
-      contextIsolation: true, // protect against prototype pollution
-      preload: path.join(__dirname, "preload.js"), // use a preload script
-    },
+    webPreferences: webPreferences,
   })
 
   loadingWindow.loadFile(path.join(__dirname, "./loadingWindow/loading.html"))
   loadingWindow.webContents.openDevTools()
 
-  loadingWindow.show()
-  
-  loadingWindow.on("closed", () => {
+  loadingWindow.on("ready-to-show", () => {
+    loadingWindow.show()
+    autoUpdater.checkForUpdates()
+  })
+
+  /* loadingWindow.on("closed", () => {
     app.exit(0)
   }) */
-
-  autoUpdater.checkForUpdates()
 
   // mainWindow
   mainWindow = new BrowserWindow({
@@ -63,58 +66,99 @@ async function main() {
     show: false, // to show loading window instead
     icon: path.join(
       __dirname,
-      os.platform() == "darwin"
+      platform() == "darwin"
         ? "./assets/icons/mac/icon.icns"
         : "./assets/icons/win/icon.ico"
     ),
     frame: true, // hide titleBar = false
     autoHideMenuBar: true, // hide alt Menu Bar = true
-    webPreferences: {
-      devTools: app.isPackaged ? false : true,
-      nodeIntegration: false, // is default value after Electron v5
-      contextIsolation: true, // protect against prototype pollution
-      enableRemoteModule: false, // turn off remote
-      preload: path.join(__dirname, "preload.js"), // use a preload script
-    },
+    webPreferences: webPreferences,
   })
   mainWindow.on("resized", () => saveBounds(mainWindow.getBounds()))
   mainWindow.on("moved", () => saveBounds(mainWindow.getBounds()))
-  mainWindow.webContents.openDevTools()
+
+  if (isDev) mainWindow.webContents.openDevTools()
+
   mainWindow.loadFile(path.join(__dirname + "/index.html"))
-  mainWindow.on("ready-to-show", () => {
-    mainWindow.show()
-    // loadingWindow.close()
+}
+
+// autoUpdater START
+autoUpdater.autoDownload = false // set Download to false
+function sendStatusToWindow(text) {
+  // mainWindow.webContents.send("message", text)
+  console.log("\u001b[" + 32 + "m" + text + "\u001b[0m")
+}
+
+autoUpdater.on("checking-for-update", () => {
+  sendStatusToWindow("Checking for update...")
+})
+autoUpdater.on("update-available", (info) => {
+  sendStatusToWindow("Update available.")
+})
+autoUpdater.on("update-not-available", (info) => {
+  sendStatusToWindow("Update not available.")
+  closeLoaderOpenMainWindow()
+})
+autoUpdater.on("error", (err) => {
+  sendStatusToWindow("Error in auto-updater. " + err)
+})
+
+autoUpdater.on("update-available", (_, releaseNotes, releaseName) => {
+  getUserDecision()
+})
+
+async function getUserDecision() {
+  const dialogOptions = {
+    type: "question",
+    defaultId: 1,
+    cancelId: 1,
+    buttons: ["Yes", "No", "Quit"],
+    noLink: true,
+    message: "Update is available, would you like to update?",
+  }
+
+  dialog.showMessageBox(loadingWindow, dialogOptions).then((userResponse) => {
+    if (userResponse.response === 0) autoUpdater.downloadUpdate()
+    if (userResponse.response === 1) closeLoaderOpenMainWindow()
+    if (userResponse.response === 2) app.exit(0)
   })
 }
 
-// autoUpdater
-
-autoUpdater.on("update-available", (_, releaseNotes, releaseName) => {
-  const dialogOptions = {
-    type: "info",
-    buttons: ["Ok"],
-    title: "Application Update",
-    message: os.platform() === "win32" ? releaseNotes : releaseName,
-    detail: "A new version is being downloaded...",
-  }
-  dialog.showMessageBox(dialogOptions, (response) => {
-    // do what I need to do with userResponse
-  })
+autoUpdater.on("download-progress", (progressObj) => {
+  const { progress, bytesPerSecond, percent, total, transferred } = progressObj
+  loadingWindow.webContents.send("update/progressBar", percent)
 })
 
-autoUpdater.on("update-downloaded", (_, releaseNotes, releaseName) => {
-  const dialogOptions = {
-    type: "info",
-    buttons: ["Restart", "Later"],
-    title: "Application Update",
-    message: os.platform() === "win32" ? releaseNotes : releaseName,
-    detail:
-      "A new version is been successfully downloaded. Would you like to restart the application to apply the update?",
+autoUpdater.on(
+  "update-downloaded",
+  (_, releaseNotes, releaseName, releaseDate, updateURL) => {
+    const dialogOptions = {
+      type: "info",
+      buttons: ["Restart", "Later"],
+      title: "Application Update",
+      message: platform() === "win32" ? releaseNotes : releaseName,
+      detail:
+        "A new version is been successfully downloaded. Would you like to restart the application to apply the update?",
+    }
+    dialog.showMessageBox(loadingWindow, dialogOptions).then((userResponse) => {
+      console.log(userResponse)
+      if (userResponse.response === 0) autoUpdater.quitAndInstall()
+      if (userResponse.response === 1) {
+        closeLoaderOpenMainWindow()
+        new Notification({
+          title: "Update Downloaded",
+          icon: "./assets/icons/png/icon.png",
+          sound: resolve(__dirname, ".", "assets", "audio", "tada.wav"),
+          silent: false,
+          body: "the update will be installed on the next restart of the application",
+          timeoutType: "default",
+        }).show()
+      }
+    })
   }
-  dialog.showMessageBox(dialogOptions).then((userResponse) => {
-    if (userResponse === 0) autoUpdater.quitAndInstall()
-  })
-})
+)
+
+// autoUpdater END
 
 // set title of Notification
 app.setAppUserModelId("MW Audio Splitter")
@@ -257,7 +301,6 @@ ipcMain.handle("toggleLoadingWindow", async (_, args) => {
 })
 
 ipcMain.handle("skipUpdate", async (_, args) => {
-  console.log("\u001b[" + 32 + "m" + "skipUpdate" + "\u001b[0m")
   mainWindow.show()
   // need to make an updatingWindow & loadingWindow separate.
   // if loadingWindow closes than continue, if updatingWindow closes than restart app
@@ -266,13 +309,6 @@ ipcMain.handle("skipUpdate", async (_, args) => {
   } catch (error) {
     console.log(`\u001b[${35}mloadingWindow: ${error}\u001b[0m`)
   }
-  // try {
-  //   loadingWindow.close()
-  // } catch (error) {
-  //   console.log(`\u001b[${35}mloadingWindow: ${error}\u001b[0m`)
-  // }
-  // mainWindow.on("ready-to-show", () => {
-  // })
 })
 
 ipcMain.on("app/quit", (_, error) => {
@@ -282,3 +318,12 @@ ipcMain.on("app/quit", (_, error) => {
 ipcMain.handle("get/appName", async (_) => {
   return app.getName()
 })
+
+async function closeLoaderOpenMainWindow() {
+  mainWindow.show()
+  try {
+    loadingWindow.close()
+  } catch (error) {
+    console.log(`\u001b[${35}mloadingWindow: ${error}\u001b[0m`)
+  }
+}
