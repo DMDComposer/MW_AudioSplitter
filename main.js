@@ -7,12 +7,11 @@ const {
   dialog,
 } = require("electron")
 const { autoUpdater } = require("electron-updater")
-const { lstatSync, readdirSync } = require("fs")
+const { lstatSync, readdirSync, existsSync, createWriteStream, rm } = require("fs")
 const { platform } = require("os")
-const path = require("path")
 const { execSync, spawnSync } = require("child_process")
 const { getWindowsBounds, saveBounds } = require("./settings")
-const { resolve } = require("path")
+const { resolve, join, extname } = require("path")
 const isDev = require("electron-is-dev")
 if (isDev) require("electron-reload")(__dirname)
 
@@ -29,7 +28,7 @@ async function main() {
     nodeIntegration: false, // is default value after Electron v5
     contextIsolation: true, // protect against prototype pollution
     enableRemoteModule: false, // turn off remote
-    preload: path.join(__dirname, "preload.js"), // use a preload script
+    preload: join(__dirname, "preload.js"), // use a preload script
   }
 
   // loadingWindow
@@ -45,12 +44,12 @@ async function main() {
     webPreferences: webPreferences,
   })
 
-  loadingWindow.loadFile(path.join(__dirname, "./loadingWindow/loading.html"))
+  loadingWindow.loadFile(join(__dirname, "./loadingWindow/loading.html"))
   loadingWindow.webContents.openDevTools()
 
-  loadingWindow.on("ready-to-show", () => {
-    loadingWindow.show()
-    autoUpdater.checkForUpdates()
+  // check for binaries, if true than run app
+  checkForBinaries().then((res) => {
+    res === true ? showLoadingWindow() : getUserDecisionBinaries()
   })
 
   /* loadingWindow.on("closed", () => {
@@ -64,7 +63,7 @@ async function main() {
     x: userRecallWindow ? x : screen.width / 2 - screen.width,
     y: userRecallWindow ? y : screen.height / 2 - screen.height,
     show: false, // to show loading window instead
-    icon: path.join(
+    icon: join(
       __dirname,
       platform() == "darwin"
         ? "./assets/icons/mac/icon.icns"
@@ -79,7 +78,50 @@ async function main() {
 
   if (isDev) mainWindow.webContents.openDevTools()
 
-  mainWindow.loadFile(path.join(__dirname + "/index.html"))
+  mainWindow.loadFile(join(__dirname + "/index.html"))
+}
+
+ipcMain.on("showLoadingWindow", (_, error) => {
+  showLoadingWindow()
+})
+
+function showLoadingWindow() {
+  loadingWindow.show()
+  autoUpdater.checkForUpdates()
+}
+
+// check for Binaries ffmpeg/ffprobe
+async function checkForBinaries() {
+  if (platform() === "darwin") {
+    const ffmpegPath = existsSync("usr/local/bin/ffmpeg")
+    const ffprobePath = existsSync("usr/local/bin/ffprobe")
+    return ffmpegPath && ffprobePath
+  }
+  const ffmpegPath = existsSync("C:/Program Files (x86)/FFmpeg/bin/ffmpeg.exe")
+  const ffprobePath = existsSync("C:/Program Files (x86)/FFmpeg/bin/ffprobe2.exe")
+  return ffmpegPath && ffprobePath
+}
+
+async function getUserDecisionBinaries() {
+  const dialogOptions = {
+    type: "question",
+    defaultId: 0,
+    cancelId: 1,
+    buttons: ["Yes", "Quit"],
+    noLink: true,
+    message: `FFmpeg & FFprobe are missing, the application needs them to run. Would you like to install them now?`,
+  }
+
+  dialog.showMessageBox(loadingWindow, dialogOptions).then(async (userResponse) => {
+    if (userResponse.response === 0) awaitDownloadBinaries()
+    if (userResponse.response === 1) app.exit(0)
+  })
+}
+
+async function awaitDownloadBinaries() {
+  const { downloadBinaries } = require("./installBinaries.js")
+  downloadBinaries().then(showLoadingWindow())
+  // showLoadingWindow()
 }
 
 // autoUpdater START
@@ -103,29 +145,44 @@ autoUpdater.on("error", (err) => {
   sendStatusToWindow("Error in auto-updater. " + err)
 })
 
-autoUpdater.on("update-available", (_, releaseNotes, releaseName) => {
-  getUserDecision()
+autoUpdater.on("update-available", (updateInfo) => {
+  getUserDecisionWin(updateInfo)
 })
 
-async function getUserDecision() {
+async function getUserDecisionWin(updateInfo) {
+  const { releaseNotes, releaseName, releaseDate, path, files, version, tag } = updateInfo
   const dialogOptions = {
     type: "question",
     defaultId: 1,
     cancelId: 1,
     buttons: ["Yes", "No", "Quit"],
     noLink: true,
-    message: "Update is available, would you like to update?",
+    message: `${version} - Update is available, would you like to download the update?`,
   }
 
-  dialog.showMessageBox(loadingWindow, dialogOptions).then((userResponse) => {
-    if (userResponse.response === 0) autoUpdater.downloadUpdate()
+  dialog.showMessageBox(loadingWindow, dialogOptions).then(async (userResponse) => {
+    // if (userResponse.response === 0)
+    //   platform() === "win32"
+    //     ? autoUpdater.downloadUpdate()
+    //     : downloadUpdateMac(updateInfo)
+    if (userResponse.response === 0) await downloadUpdateMac(updateInfo)
     if (userResponse.response === 1) closeLoaderOpenMainWindow()
     if (userResponse.response === 2) app.exit(0)
   })
 }
 
+async function downloadUpdateMac(updateInfo) {
+  const { releaseNotes, releaseName, releaseDate, path, files, version, tag } = updateInfo
+  const { macUpdater } = require("./macUpdater")
+  let options = {
+    gitUsername: "DMDComposer",
+    gitRepo: "MW_AudioSplitter",
+  }
+  // console.log("\u001b[" + 31 + "m" + (await macUpdater(options)) + "\u001b[0m")
+}
+
 autoUpdater.on("download-progress", (progressObj) => {
-  const { progress, bytesPerSecond, percent, total, transferred } = progressObj
+  const { percent } = progressObj
   loadingWindow.webContents.send("update/progressBar", percent)
 })
 
@@ -253,7 +310,7 @@ ipcMain.handle("getTotalFilesInDestPath", async (_, destPath) => {
   const totalFilesInDestPath = readdirSync(destPath)
 
   totalFilesInDestPath.forEach((file) => {
-    if (path.extname(file) == ".wav") sum += 1
+    if (extname(file) == ".wav") sum += 1
   })
 
   return sum

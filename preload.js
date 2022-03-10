@@ -29,6 +29,7 @@ const api = {
   newNotification: (args) => ipcRenderer.invoke("newNotification", args),
   newDialog: (args) => ipcRenderer.invoke("newDialog", args),
   toggleLoadingWindow: (args) => ipcRenderer.invoke("toggleLoadingWindow", args),
+  showLoadingWindow: () => ipcRenderer.send("showLoadingWindow"),
   skipUpdate: (args) => ipcRenderer.invoke("skipUpdate", args),
   platform: os.platform(),
   path: path,
