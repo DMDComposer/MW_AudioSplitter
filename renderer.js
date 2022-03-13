@@ -169,8 +169,10 @@ async function splitAudioFiles(e) {
   MAIN_APP.innerText = "Finalizing Audio..."
   INNER_BAR_LOADING.style.width = `100%`
 
-  FINAL_MESSAGE.innerHTML =
-    "<b>List of Silent Audio Stems Below:</b>\n" + getSilentAudioList(silentAudioList)
+  const silentAudioListTotal = silentAudioList.length ? `(${silentAudioList.length})` : ""
+  FINAL_MESSAGE.innerHTML = `<b>List of Silent Audio Stems Below: ${silentAudioListTotal}</b>${getSilentAudioList(
+    silentAudioList
+  )}`
 
   // let countAudioSplits = getCountAudioSplits(destPath),
   let countAudioSplits = await api.getCountAudioSplits(destPath),
@@ -194,11 +196,12 @@ function getSilentAudioList(data) {
 }
 
 function getSilentAudioListTable(data) {
-  var result = "<table border=1>"
-  for (var i = 0; i < myArray.length; i++) {
-    result += "<tr>"
-    for (var j = 0; j < myArray[i].length; j++) {
-      result += "<td>" + myArray[i][j] + "</td>"
+  var result = "<table border=0 style='font-family: Arial;'>"
+  let index = 0
+  for (var i = 0; i < data.length; i++) {
+    result += `<tr>`
+    for (var j = 0; j < data[i].length; j++) {
+      result += `<td>${data[i][j]}</td>`
     }
     result += "</tr>"
   }

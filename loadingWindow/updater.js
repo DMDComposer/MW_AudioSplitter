@@ -3,8 +3,15 @@ const label = document.getElementById("download-label")
 
 window.api.on("update/progressBar", (args) => {
   // console.table({ args })
+  console.log(args)
   try {
     if (progressBar !== null) progressBar.setAttribute("value", args)
+  } catch {}
+})
+
+window.api.on("update/statusTitle", (args) => {
+  try {
+    if (label !== null) label.innerHTML = args
   } catch {}
 })
 

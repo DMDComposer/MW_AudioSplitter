@@ -7,7 +7,7 @@ const {
   dialog,
 } = require("electron")
 const { autoUpdater } = require("electron-updater")
-const { lstatSync, readdirSync, existsSync, createWriteStream, rm } = require("fs")
+const { lstatSync, readdirSync, existsSync } = require("fs")
 const { platform } = require("os")
 const { execSync, spawnSync } = require("child_process")
 const { getWindowsBounds, saveBounds } = require("./settings")
@@ -44,12 +44,18 @@ async function main() {
     webPreferences: webPreferences,
   })
 
-  loadingWindow.loadFile(join(__dirname, "./loadingWindow/loading.html"))
+  loadingWindow.loadFile(join(__dirname, ".", "loadingWindow", "loading.html"))
   loadingWindow.webContents.openDevTools()
 
-  // check for binaries, if true than run app
-  checkForBinaries().then((res) => {
-    res === true ? showLoadingWindow() : getUserDecisionBinaries()
+  loadingWindow.on("ready-to-show", async () => {
+    loadingWindow.show()
+  })
+
+  loadingWindow.on("show", async () => {
+    const binariesInstalled = await checkForBinaries()
+    if (!binariesInstalled) await getUserDecisionBinaries()
+    console.log("\u001b[" + 31 + "m" + "log before checking updates" + "\u001b[0m")
+    autoUpdater.checkForUpdates()
   })
 
   /* loadingWindow.on("closed", () => {
@@ -78,7 +84,7 @@ async function main() {
 
   if (isDev) mainWindow.webContents.openDevTools()
 
-  mainWindow.loadFile(join(__dirname + "/index.html"))
+  mainWindow.loadFile(join(__dirname, "index.html"))
 }
 
 ipcMain.on("showLoadingWindow", (_, error) => {
@@ -98,7 +104,7 @@ async function checkForBinaries() {
     return ffmpegPath && ffprobePath
   }
   const ffmpegPath = existsSync("C:/Program Files (x86)/FFmpeg/bin/ffmpeg.exe")
-  const ffprobePath = existsSync("C:/Program Files (x86)/FFmpeg/bin/ffprobe2.exe")
+  const ffprobePath = existsSync("C:/Program Files (x86)/FFmpeg/bin/ffprobe.exe")
   return ffmpegPath && ffprobePath
 }
 
@@ -112,15 +118,16 @@ async function getUserDecisionBinaries() {
     message: `FFmpeg & FFprobe are missing, the application needs them to run. Would you like to install them now?`,
   }
 
-  dialog.showMessageBox(loadingWindow, dialogOptions).then(async (userResponse) => {
-    if (userResponse.response === 0) awaitDownloadBinaries()
+  await dialog.showMessageBox(loadingWindow, dialogOptions).then(async (userResponse) => {
+    if (userResponse.response === 0) await awaitDownloadBinaries()
     if (userResponse.response === 1) app.exit(0)
   })
+  console.log("end of getUserDecisionBinaries()")
 }
 
 async function awaitDownloadBinaries() {
-  const { downloadBinaries } = require("./installBinaries.js")
-  downloadBinaries().then(showLoadingWindow())
+  const { downloadBinaries } = require("./loadingWindow/installBinaries.js")
+  await downloadBinaries(loadingWindow)
   // showLoadingWindow()
 }
 
@@ -160,11 +167,7 @@ async function getUserDecisionWin(updateInfo) {
     message: `${version} - Update is available, would you like to download the update?`,
   }
 
-  dialog.showMessageBox(loadingWindow, dialogOptions).then(async (userResponse) => {
-    // if (userResponse.response === 0)
-    //   platform() === "win32"
-    //     ? autoUpdater.downloadUpdate()
-    //     : downloadUpdateMac(updateInfo)
+  await dialog.showMessageBox(loadingWindow, dialogOptions).then(async (userResponse) => {
     if (userResponse.response === 0) await downloadUpdateMac(updateInfo)
     if (userResponse.response === 1) closeLoaderOpenMainWindow()
     if (userResponse.response === 2) app.exit(0)
@@ -228,7 +231,7 @@ ipcMain.handle("is-folder", async (_, path) => {
   try {
     return lstatSync(path).isDirectory()
   } catch (error) {
-    console.log(error)
+    // console.log(error)
     return false
   }
 })
