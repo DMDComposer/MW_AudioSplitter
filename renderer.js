@@ -174,10 +174,8 @@ async function splitAudioFiles(e) {
     silentAudioList
   )}`
 
-  // let countAudioSplits = getCountAudioSplits(destPath),
   let countAudioSplits = await api.getCountAudioSplits(destPath),
     totalFilesInDestPath = await api.getTotalFilesInDestPath(destPath),
-    // let totalFilesInDestPath = window.api.fs.readdirSync(destPath).length
     fileMissingError =
       countAudioSplits[1] != totalFilesInDestPath
         ? "ERROR: MISSING STEMS"

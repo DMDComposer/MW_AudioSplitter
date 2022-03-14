@@ -55,7 +55,7 @@ async function main() {
     const binariesInstalled = await checkForBinaries()
     if (!binariesInstalled) await getUserDecisionBinaries()
     console.log("\u001b[" + 31 + "m" + "log before checking updates" + "\u001b[0m")
-    autoUpdater.checkForUpdates()
+    // autoUpdater.checkForUpdates()
   })
 
   /* loadingWindow.on("closed", () => {
@@ -99,11 +99,11 @@ function showLoadingWindow() {
 // check for Binaries ffmpeg/ffprobe
 async function checkForBinaries() {
   if (platform() === "darwin") {
-    const ffmpegPath = existsSync("usr/local/bin/ffmpeg")
-    const ffprobePath = existsSync("usr/local/bin/ffprobe")
+    const ffmpegPath = existsSync("/usr/local/bin/ffmpeg")
+    const ffprobePath = existsSync("/usr/local/bin/ffprobe")
     return ffmpegPath && ffprobePath
   }
-  const ffmpegPath = existsSync("C:/Program Files (x86)/FFmpeg/bin/ffmpeg.exe")
+  const ffmpegPath = existsSync("C:/Program Files (x86)/FFmpeg/bin/ffmpeg1.exe")
   const ffprobePath = existsSync("C:/Program Files (x86)/FFmpeg/bin/ffprobe.exe")
   return ffmpegPath && ffprobePath
 }
@@ -176,12 +176,13 @@ async function getUserDecisionWin(updateInfo) {
 
 async function downloadUpdateMac(updateInfo) {
   const { releaseNotes, releaseName, releaseDate, path, files, version, tag } = updateInfo
-  const { macUpdater } = require("./macUpdater")
+  const { macUpdater, downloadDMG } = require("./macUpdater")
   let options = {
     gitUsername: "DMDComposer",
     gitRepo: "MW_AudioSplitter",
   }
-  // console.log("\u001b[" + 31 + "m" + (await macUpdater(options)) + "\u001b[0m")
+  const macDmgLink = await macUpdater(options)
+  const downloadDmg = await downloadDMG(loadingWindow, macDmgLink)
 }
 
 autoUpdater.on("download-progress", (progressObj) => {
