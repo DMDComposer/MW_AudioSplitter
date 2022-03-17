@@ -178,9 +178,9 @@ async function downloadUpdateMac(updateInfo) {
     gitRepo: "MW_AudioSplitter",
   }
   const macDmgLink = await macUpdater(options)
-  const downloadDmg = await downloadDMG(loadingWindow, macDmgLink)
-  if (downloadDMG === true) app.relaunch, app.exit(0)
-  if (downloadDmg === false) console.log("something went wrong with installl...")
+  const downloadDmgResults = await downloadDMG(loadingWindow, macDmgLink)
+  if (downloadDmgResults === true) app.relaunch(), app.exit()
+  if (downloadDmgResults === false) console.log("something went wrong with install...")
 }
 
 autoUpdater.on("download-progress", (progressObj) => {

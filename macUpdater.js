@@ -102,9 +102,9 @@ async function installDMG(window, path, dmgOptions) {
 
   window.webContents.send("update/statusTitle", "Unmounting DMG...")
   try {
-    execSync(`hdiutil unmount "${path}" -force`)
+    execSync(`hdiutil detach "/Volumes/${appName} ${appVersion}" -force`)
   } catch (error) {
-    console.log(error)
+    console.log(error.stderr.toString())
   }
   const results = await CleanUp(window, path)
   return results
