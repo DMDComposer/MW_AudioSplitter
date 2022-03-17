@@ -55,12 +55,8 @@ async function main() {
     const binariesInstalled = await checkForBinaries()
     if (!binariesInstalled) await getUserDecisionBinaries()
     console.log("\u001b[" + 31 + "m" + "log before checking updates" + "\u001b[0m")
-    // autoUpdater.checkForUpdates()
+    autoUpdater.checkForUpdates()
   })
-
-  /* loadingWindow.on("closed", () => {
-    app.exit(0)
-  }) */
 
   // mainWindow
   mainWindow = new BrowserWindow({
@@ -183,6 +179,8 @@ async function downloadUpdateMac(updateInfo) {
   }
   const macDmgLink = await macUpdater(options)
   const downloadDmg = await downloadDMG(loadingWindow, macDmgLink)
+  if (downloadDMG === true) app.relaunch, app.exit(0)
+  if (downloadDmg === false) console.log("something went wrong with installl...")
 }
 
 autoUpdater.on("download-progress", (progressObj) => {

@@ -1,7 +1,7 @@
 {
   "name": "MW_AudioSplitter",
   "appId": "com.MW.AudioSplitter",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Audio Splitting using FFmpeg & FFprobe",
   "main": "main.js",
   "scripts": {
