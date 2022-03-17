@@ -103,7 +103,7 @@ async function checkForBinaries() {
     const ffprobePath = existsSync("/usr/local/bin/ffprobe")
     return ffmpegPath && ffprobePath
   }
-  const ffmpegPath = existsSync("C:/Program Files (x86)/FFmpeg/bin/ffmpeg1.exe")
+  const ffmpegPath = existsSync("C:/Program Files (x86)/FFmpeg/bin/ffmpeg.exe")
   const ffprobePath = existsSync("C:/Program Files (x86)/FFmpeg/bin/ffprobe.exe")
   return ffmpegPath && ffprobePath
 }
@@ -378,6 +378,9 @@ ipcMain.on("app/quit", (_, error) => {
 
 ipcMain.handle("get/appName", async (_) => {
   return app.getName()
+})
+ipcMain.handle("get/appVersion", async (_) => {
+  return app.getVersion()
 })
 
 async function closeLoaderOpenMainWindow() {

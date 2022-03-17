@@ -14,6 +14,7 @@ const api = {
     quit: () => ipcRenderer.send("app/quit"),
   },
   appName: () => ipcRenderer.invoke("get/appName"),
+  appVersion: () => ipcRenderer.invoke("get/appVersion"),
   isFile: (path) => ipcRenderer.invoke("is-file", path),
   isFolder: (path) => ipcRenderer.invoke("is-folder", path),
   ffmpeg: (args) => ipcRenderer.invoke("ffmpeg", args),

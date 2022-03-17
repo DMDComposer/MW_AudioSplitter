@@ -36,7 +36,7 @@ async function GetUpdateURL(options) {
 async function downloadDMG(window, url, path) {
   let path = appData
   console.log("downloading")
-  // updateHeader("Downloading FFmpeg & FFprobe") // update window header
+  window.webContents.send("update/statusTitle", "Downloading new update...")
   let received_bytes = 0
   let total_bytes = 0
 
@@ -61,9 +61,9 @@ async function downloadDMG(window, url, path) {
   })
 
   req.on("end", async () => {
-    await installDMG(window, path)
+    const results = await installDMG(window, path)
     console.log("done downloading")
-    return true
+    resolve(results)
   })
   console.log("down here")
 }

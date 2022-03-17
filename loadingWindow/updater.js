@@ -1,5 +1,9 @@
 const progressBar = document.getElementById("download")
 const label = document.getElementById("download-label")
+const appVersion = document.querySelector(".appVersion")
+
+const currVersion = await window.api.appVersion()
+appVersion.innerHTML = `<h3>${currVersion} Application Is Starting...</h3>`
 
 window.api.on("update/progressBar", (args) => {
   // console.table({ args })

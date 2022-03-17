@@ -25,6 +25,10 @@
   position: fixed;
 }
 
+.appVersion {
+  color: #fff;
+}
+
 /* Safari */
 @-webkit-keyframes spin {
   0% {

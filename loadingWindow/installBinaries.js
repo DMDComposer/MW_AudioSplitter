@@ -1,10 +1,9 @@
 const { app } = require("electron")
 const { resolve } = require("path")
 const { platform } = require("os")
-const { execSync } = require("child_process")
 const Sudoer = require("electron-sudo").default
 const request = require("request")
-const { createWriteStream, rm, rmSync, existsSync } = require("fs")
+const { createWriteStream, rmSync } = require("fs")
 
 const sleep = (ms = 0) => new Promise((res) => setTimeout(res, ms))
 const appData = resolve(app.getPath("userData"), "tmpDownload.zip")
