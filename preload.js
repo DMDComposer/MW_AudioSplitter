@@ -32,6 +32,7 @@ const api = {
   toggleLoadingWindow: (args) => ipcRenderer.invoke("toggleLoadingWindow", args),
   showLoadingWindow: () => ipcRenderer.send("showLoadingWindow"),
   skipUpdate: (args) => ipcRenderer.invoke("skipUpdate", args),
+  continueDialog: (args) => ipcRenderer.invoke("continueDialog/AfterDrop", args),
   platform: os.platform(),
   path: path,
   os: os,

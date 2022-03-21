@@ -389,3 +389,22 @@ async function closeLoaderOpenMainWindow() {
     console.log(`\u001b[${35}mloadingWindow: ${error}\u001b[0m`)
   }
 }
+
+ipcMain.handle("continueDialog/AfterDrop", async (_, args) => {
+  const dialogOptions = {
+    type: "question",
+    defaultId: 1,
+    cancelId: 1,
+    buttons: ["Yes", "No"],
+    noLink: true,
+    message: `You've only uploaded ${args} audio files, MW stems are always 17, 
+              would you like to continue anyway?`,
+  }
+
+  return await dialog
+    .showMessageBox(loadingWindow, dialogOptions)
+    .then(async (userResponse) => {
+      if (userResponse.response === 0) return true
+      if (userResponse.response === 1) return false
+    })
+})

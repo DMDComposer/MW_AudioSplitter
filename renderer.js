@@ -130,6 +130,12 @@ async function splitAudioFiles(e) {
     totalAudioNull = 0,
     progressCount = 0
 
+  // MW default total stems are 17, if not that ask to continue
+  if (totalAudio !== 17) {
+    const results = await api.continueDialog(totalAudio)
+    if (results === false) return
+  }
+
   // Init progressBar counter
   OUTER_BAR_LOADING.style.display = "block"
 

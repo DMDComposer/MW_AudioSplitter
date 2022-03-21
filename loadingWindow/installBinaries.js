@@ -73,9 +73,7 @@ async function Install(window, path) {
   const AdmZip = require("adm-zip")
   const zip = new AdmZip(path)
   const zipExtractPath =
-    platform() === "darwin"
-      ? "/usr/local/bin/"
-      : "D:/Users/Dillon/Downloads/New Folder (3)"
+    platform() === "darwin" ? "/usr/local/bin/" : "C:/Program Files (x86)/FFmpeg"
 
   try {
     console.log(path)
