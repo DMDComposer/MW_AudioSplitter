@@ -1,16 +1,19 @@
 {
   "name": "MW_AudioSplitter",
   "appId": "com.MW.AudioSplitter",
-  "version": "1.0.8",
+  "version": "1.1.8",
   "description": "Audio Splitting using FFmpeg & FFprobe",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
+    "dev": "electron .",
     "build": "electron-builder",
+    "build-win": "electron-builder -p never --win",
     "publish": "electron-builder --win --publish always"
   },
   "build": {
     "appId": "app.id",
+    "productName": "MW_AudioSplitter",
+    "copyright": "Copyright © 2022 DeRosa Studios",
     "mac": {
       "icon": "./assets/icons/mac/icon.icns",
       "category": "your.app.category.type",
@@ -24,7 +27,15 @@
           "repo": "MW_AudioSplitter"
         }
       ],
-      "icon": "./assets/icons/win/icon.ico"
+      "icon": "./assets/icons/win/icon.ico",
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true
     }
   },
   "author": "DMDComposer",

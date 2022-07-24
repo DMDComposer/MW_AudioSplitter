@@ -12,5 +12,11 @@ win:
       owner: DMDComposer
       repo: MW_AudioSplitter
   icon: ./assets/icons/win/icon.ico
+  target:
+    - nsis
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
 files: []
 electronVersion: 17.1.2

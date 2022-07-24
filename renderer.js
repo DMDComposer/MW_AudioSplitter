@@ -1,4 +1,9 @@
-import { split1MXAudio, split2MXAudio, split6MXAudio } from "./splitMXAudio.js"
+import {
+  split1MXAudio,
+  split2MXAudio,
+  split6MXAudio,
+  convertInterleavedAudio,
+} from "./splitMXAudio.js"
 import { checkAudioNull } from "./checkAudioNull.js"
 const currDestPath = api.getLastSavedDestPath()
 const ffprobe = api.platform !== "darwin" ? "ffprobe" : "/usr/local/bin/ffprobe"
@@ -11,7 +16,9 @@ const INNER_BAR_LOADING = document.getElementById("inner-bar-loading"),
   initDestPath = document.getElementById("inputDestPath"),
   dropZoneHover = document.querySelector("#dropZone .icon"),
   hiddenInputFile = document.getElementById("hiddenInputFile"),
-  browseButton = document.getElementById("browseButton")
+  browseButton = document.getElementById("browseButton"),
+  interleavedSwitch = document.getElementById("interleavedSwitch"),
+  silenceToleranceInput = document.getElementById("silenceToleranceInput")
 
 // setting user recalled destination path, if still valid then color border green
 initDestPath.value = currDestPath
@@ -27,6 +34,11 @@ async function openBrowseDialog() {
 browseButton.addEventListener("click", (e) => {
   openBrowseDialog()
 })
+
+// interleavedSwitch.addEventListener("click", (e) => {
+//   console.log("yel")
+//   interleavedSwitch.checked = true
+// })
 
 hiddenInputFile.addEventListener("change", async (e) => {
   let droppedItem = e.target.files[0].path
@@ -130,6 +142,21 @@ async function splitAudioFiles(e) {
     totalAudioNull = 0,
     progressCount = 0
 
+  let noiseToleranceValue = silenceToleranceInput.value
+
+  if (
+    typeof noiseToleranceValue !== Number &&
+    (noiseToleranceValue <= 0 || noiseToleranceValue >= 127)
+  ) {
+    api.newNotification([
+      "Error!",
+      "Silent Detection Threshold: ",
+      "Please select a valid value range from 0 to 127",
+    ])
+    silenceToleranceInput.value = 80
+    return
+  }
+
   // MW default total stems are 17, if not that ask to continue
   if (totalAudio !== 17) {
     const results = await api.continueDialog(totalAudio)
@@ -145,7 +172,7 @@ async function splitAudioFiles(e) {
     if (isFile) {
       let fileName = file.path,
         audioChannels = ""
-      if (await checkAudioNull(fileName)) {
+      if (await checkAudioNull(fileName, noiseToleranceValue)) {
         silentAudioList.push(window.api.path.basename(fileName)) // fileName.wav
         totalAudioNull++
         continue
@@ -163,9 +190,15 @@ async function splitAudioFiles(e) {
           }
         })
 
-      if (audioChannels == 1) split1MXAudio(fileName, destPath)
-      if (audioChannels == 2) split2MXAudio(fileName, destPath)
-      if (audioChannels == 6) split6MXAudio(fileName, destPath)
+      let switchValue = interleavedSwitch.checked
+
+      if (!switchValue) {
+        if (audioChannels == 1) split1MXAudio(fileName, destPath)
+        if (audioChannels == 2) split2MXAudio(fileName, destPath)
+        if (audioChannels == 6) split6MXAudio(fileName, destPath)
+      }
+
+      if (switchValue) convertInterleavedAudio(fileName, destPath)
 
       progressBarUpdate((progressCount += 1), totalAudio)
     }

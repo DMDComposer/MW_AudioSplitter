@@ -32,3 +32,12 @@ export function split6MXAudio(fileName, destPath) {
 
   api.ffmpeg([splitAudioCMD.replaceAll(/\\/g, "/"), execSyncOptions])
 }
+
+export function convertInterleavedAudio(fileName, destPath) {
+  const outNNE = path.parse(fileName).name,
+    outExt = path.parse(fileName).ext.substring(1)
+  let outPath = destPath,
+    splitAudioCMD = `${ffmpeg} -y -i "${fileName}" -acodec pcm_s24le -write_bext 1 "${outPath}\\${outNNE}.${outExt}"`
+
+  api.ffmpeg([splitAudioCMD.replaceAll(/\\/g, "/"), execSyncOptions])
+}

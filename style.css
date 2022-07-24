@@ -103,3 +103,45 @@ input {
   display: grid;
   place-items: center;
 }
+
+input[type="checkbox"] {
+  height: 0;
+  width: 0;
+  visibility: hidden;
+}
+
+#switchLabel {
+  cursor: pointer;
+  text-indent: -9999px;
+  width: 50px;
+  height: 25px;
+  background: grey;
+  display: block;
+  border-radius: 100px;
+  position: relative;
+}
+
+#switchLabel:after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 22px;
+  height: 22px;
+  background: #fff;
+  border-radius: 22px;
+  transition: 0.3s;
+}
+
+input:checked + #switchLabel {
+  background: #5ccc7f;
+}
+
+input:checked + #switchLabel:after {
+  left: calc(100% - 5px);
+  transform: translateX(-100%);
+}
+
+#switchLabel:active:after {
+  width: 130px;
+}

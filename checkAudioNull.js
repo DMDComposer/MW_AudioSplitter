@@ -1,9 +1,9 @@
 const ffprobe = api.platform !== "darwin" ? "ffprobe" : "/usr/local/bin/ffprobe"
 const ffmpeg = api.platform !== "darwin" ? "ffmpeg" : "/usr/local/bin/ffmpeg"
 
-export async function checkAudioNull(filePath) {
+export async function checkAudioNull(filePath, noiseTolerance = 80) {
   const totalDuration = await getTotalDuration(filePath),
-    totalSilence = await getTotalSilence(filePath)
+    totalSilence = await getTotalSilence(filePath, noiseTolerance)
   return totalDuration == totalSilence
 }
 
@@ -16,8 +16,10 @@ async function getTotalDuration(filePath) {
   return Number(totalDuration).toFixed(4)
 }
 
-async function getTotalSilence(filePath) {
-  const cmdTotalSilence = `${ffmpeg} -i "${filePath}" -af silencedetect=noise=0.0001:mono=0 -f null - `,
+async function getTotalSilence(filePath, noiseTolerance) {
+  // noise=0.001 is equivalent to -60dB
+  // noise=0.0001 is equivalent to -80dB
+  const cmdTotalSilence = `${ffmpeg} -i "${filePath}" -af silencedetect=noise=-${noiseTolerance}dB:mono=0 -f null - `,
     audioNullResult = await api.getTotalSilence([
       cmdTotalSilence,
       [],
@@ -36,5 +38,9 @@ async function getTotalSilence(filePath) {
         totalSilence += duration
       }
     })
+  console.log(
+    "🚀 ~ file: checkAudioNull.js ~ line 21 ~ getTotalSilence ~ cmdTotalSilence",
+    cmdTotalSilence
+  )
   return Number(totalSilence).toFixed(4)
 }
