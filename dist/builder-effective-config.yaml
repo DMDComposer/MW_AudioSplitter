@@ -2,6 +2,8 @@ directories:
   output: dist
   buildResources: build
 appId: app.id
+productName: MW_AudioSplitter
+copyright: Copyright © 2022 DeRosa Studios
 mac:
   icon: ./assets/icons/mac/icon.icns
   category: your.app.category.type
@@ -16,7 +18,7 @@ win:
     - nsis
 nsis:
   oneClick: false
-  perMachine: false
+  perMachine: true
   allowToChangeInstallationDirectory: true
 files: []
 electronVersion: 17.1.2

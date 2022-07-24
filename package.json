@@ -8,6 +8,7 @@
     "dev": "electron .",
     "build": "electron-builder",
     "build-win": "electron-builder -p never --win",
+    "build-mac": "electron-builder --mac",
     "publish": "electron-builder --win --publish always"
   },
   "build": {
